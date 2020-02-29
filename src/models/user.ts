@@ -40,4 +40,4 @@ User.init({
 }, {
   sequelize: database,
   tableName: 'users'
-})
+});

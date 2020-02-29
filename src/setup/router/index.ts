@@ -1,41 +1,36 @@
 import { app } from '../../index';
 import { Method } from './interfaces';
-import validate from 'express-validation';
 import { NextFunction, Request, Response } from 'express';
+import { throwException } from '../../utils/error-handler';
+import { validateSchema } from '../validate';
+import { SchemaMap } from 'joi';
 
 type MiddlwewareFunction = (req: Request, res: Response, next: NextFunction) => void
-type ControllerFunction = (req: Request, res: Response, next: NextFunction) => object
+type ControllerFunction = (req: Request, res: Response, next: NextFunction) => object | Promise<object>
 
 export class Router {
-  private async returnResponseFromController (
-    req: Request,
-    res: Response,
-    next: NextFunction,
+  private returnResponseFromController (
     controller: ControllerFunction,
     method: Method
-  ): Promise<Response> {
+  ): (req: Request, res: Response, next: NextFunction) => Promise<Response> {
+    return async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+      try {
+        const controllerResponse: object = await controller(req, res, next);
+        const responseCode: number = this.determineResponseCode(method);
 
-    try {
-      const controllerResponse: object = await controller(req, res, next);
-      const responseCode: number = this.determineResponseCode(method);
-
-      return res.status(responseCode).json(controllerResponse)
-    } catch (e) {
-
-      return res.status(e.status).json({
-        message: e.message,
-        err_code: e.code,
-      })
+        return res.status(responseCode).json(controllerResponse)
+      } catch (e) {
+        return throwException(e.message, res);
+      }
     }
-
   }
 
   private determineResponseCode (method: Method): number {
     switch (method) {
     case Method.get:
-      return 200
+      return 200;
     case Method.post:
-      return 201
+      return 201;
     default:
       return 200
     }
@@ -43,18 +38,16 @@ export class Router {
 
   public exposed (
     route: string,
-    version: string,
+    version: number,
     controller: ControllerFunction,
-    schema: object,
+    schema: SchemaMap,
     method: Method,
     middleware?: MiddlwewareFunction,
   ): void {
     app[method](
-      `/${version}/${route}`,
-      validate(schema),
-      middleware ? middleware : (_req, _res, next) => {
-        next()
-      },
-      (req, res, next) => this.returnResponseFromController(req, res,next, controller, method))
+      `/v${version}/${route}`,
+      validateSchema(schema),
+      middleware !== undefined ? middleware : (_req: Request, _res: Response, next: NextFunction): void => { next(); },
+      this.returnResponseFromController(controller, method))
   }
 }
