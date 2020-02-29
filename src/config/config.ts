@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import { throwException } from '../utils/error-handler';
+import { throwException } from '../setup/errors';
 
 dotenv.config();
 

@@ -1,6 +1,6 @@
 import joi, { SchemaMap } from 'joi'
 import { NextFunction, Request, Response } from 'express';
-import { throwException } from '../../utils/error-handler';
+import { throwException } from '../errors';
 
 export interface ValidationRules {
     params?: SchemaMap;

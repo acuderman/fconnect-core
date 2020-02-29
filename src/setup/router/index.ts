@@ -1,7 +1,7 @@
 import { app } from '../../index';
 import { Method } from './interfaces';
 import { NextFunction, Request, Response } from 'express';
-import { throwException } from '../../utils/error-handler';
+import { throwException } from '../errors';
 import { validateSchema } from '../validate';
 import { SchemaMap } from 'joi';
 
