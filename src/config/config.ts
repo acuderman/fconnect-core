@@ -1,16 +1,17 @@
 import dotenv from 'dotenv'
-import { throwException } from '../setup/errors';
 
 dotenv.config();
 
 export const DATABASE_CONNECTION_URL: string | undefined = process.env.DATABASE_CONNECTION_URL
 
-function checkEnvironmentVariables (): boolean {
-  return DATABASE_CONNECTION_URL !== undefined
+export function initConfig (): void {
+  if (!checkEnvironmentVariables()) {
+    // eslint-disable-next-line no-console
+    console.log('ERR_INVALID_ENVIRONMENT_VARIABLES');
+    process.exit(1);
+  }
 }
 
-export function initConfig (): void {
-  if (!checkEnvironmentVariables) {
-    throwException('ERR_INVALID_ENV_VARIABLES')
-  }
+function checkEnvironmentVariables (): boolean {
+  return DATABASE_CONNECTION_URL !== undefined
 }
