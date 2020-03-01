@@ -11,14 +11,17 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      famnit_email: {
+      student_email: {
         type: Sequelize.STRING,
-        defaultValue: null,
-        allowNull: true,
+        allowNull: false,
       },
       activated: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
+        allowNull: false,
+      },
+      tracking_id: {
+        type: Sequelize.STRING(36),
         allowNull: false,
       },
       expires_at: {

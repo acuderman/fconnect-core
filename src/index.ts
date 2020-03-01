@@ -13,7 +13,6 @@ app.listen(port, () => {
 
 app.use(bodyParser.json())
 
-console.log('called')
 initConfig();
 initRoutes();
 
