@@ -1,5 +1,5 @@
 import sendgrid from 'sendgrid'
-import { BASE_URI, SENDGRID_API_KEY } from '../../config/config';
+import { BASE_URI, SENDGRID_API_KEY } from '../../config';
 
 
 export async function sendRegistrationMail (email: string, confirm_uuid: string): Promise<void> {

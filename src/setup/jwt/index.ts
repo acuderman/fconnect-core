@@ -1,5 +1,5 @@
 import { sign, verify } from 'jsonwebtoken'
-import { SERVER_PRIVATE_KEY } from '../../config/config';
+import { SERVER_PRIVATE_KEY } from '../../config';
 import { ExtendedProtectedRequest } from '../interfaces';
 
 export interface TokenData {

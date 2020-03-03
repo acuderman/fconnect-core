@@ -20,6 +20,6 @@ export function initConfig (): void {
 
 function checkEnvironmentVariables (): boolean {
   return DATABASE_CONNECTION_URL !== undefined
-         && SENDGRID_API_KEY !== undefined
-          && BASE_URI !== undefined
+      && SENDGRID_API_KEY !== undefined
+      && BASE_URI !== undefined
 }

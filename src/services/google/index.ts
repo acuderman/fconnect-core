@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { GOOGLE_API_BASE_URL } from '../../config/config';
+import { GOOGLE_API_BASE_URL } from '../../config';
 
 export interface DecodedGoogleIdToken {
     'iss': string;
