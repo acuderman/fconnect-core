@@ -1,5 +1,5 @@
 import express from 'express'
-import { initConfig } from './config/config';
+import { initConfig } from './config';
 import { initRoutes } from './routes';
 import bodyParser from 'body-parser'
 
@@ -13,7 +13,6 @@ app.listen(port, () => {
 
 app.use(bodyParser.json())
 
-console.log('called')
 initConfig();
 initRoutes();
 

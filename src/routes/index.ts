@@ -1,5 +1,5 @@
 import { Router } from '../setup/router';
-import { register } from '../controllers/registration';
+import { registerController, verifyEmailController, loginController } from '../controllers/authentication/registration-controller';
 import joi from 'joi'
 import { Method } from '../setup/router/interfaces';
 
@@ -12,12 +12,36 @@ function addRegistrationRoutes(router: Router): void {
   router.exposed(
     'register',
     1,
-    register,
+    registerController,
     {
       body: {
-        google_email: joi.string().email().required(),
-        famnit_email: joi.string().email().required(),
+        google_id_token: joi.string().required(),
+        student_email: joi.string().email().required(),
       },
+    },
+    Method.post,
+  )
+
+  router.exposed(
+    'register/verify/:tracking_id',
+    1,
+    verifyEmailController,
+    {
+      params: {
+        tracking_id: joi.string().uuid().required(),
+      },
+    },
+    Method.get,
+  )
+
+  router.exposed(
+    'login',
+    1,
+    loginController,
+    {
+      body: {
+        google_id_token: joi.string().required(),
+      }
     },
     Method.post,
   )

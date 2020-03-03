@@ -2,11 +2,11 @@ import { DataTypes, Model } from 'sequelize';
 import { database } from '../setup/sequlize';
 
 export class User extends Model {
-    public id!: number;
+    public id!: string;
     public google_email!: string;
-    public famnit_email!: string | null;
+    public student_email!: string;
     public activated!: boolean;
-    public verification_url_uuid!: string;
+    public tracking_id!: string;
     public expires_at!: Date | null;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
@@ -22,10 +22,13 @@ User.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
-  famnit_email: {
+  student_email: {
     type: DataTypes.STRING,
-    defaultValue: null,
-    allowNull: true,
+    allowNull: false,
+  },
+  tracking_id: {
+    type: DataTypes.STRING(36),
+    allowNull: false,
   },
   activated: {
     type: DataTypes.BOOLEAN,
