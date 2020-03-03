@@ -50,6 +50,11 @@ export const errorList: ErrorList = {
     status: 400,
     err_code: 'ERR_USER_DOES_NOT_EXIST',
     message: 'User not found.'
+  },
+  'ERR_USER_NOT_ACTIVATED': {
+    status: 401,
+    err_code: 'ERR_USER_NOT_ACTIVATED',
+    message: 'You need to verify your student email.'
   }
 };
 

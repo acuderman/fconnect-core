@@ -44,3 +44,12 @@ export async function getUserById (user_id: string): Promise<User | null> {
     }
   })
 }
+
+export async function getUserByGoogleEmail (google_email: string): Promise<User | null> {
+
+  return User.findOne({
+    where: {
+      google_email: google_email,
+    }
+  })
+}

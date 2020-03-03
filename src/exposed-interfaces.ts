@@ -10,9 +10,8 @@ export namespace API {
                         google_id_token: string;
                         student_email: string;
                 }
-                export interface Response {
-                    access_token: string;
-                }
+                // eslint-disable-next-line @typescript-eslint/no-empty-interface
+                export interface Response {}
             }
             export namespace GET {
                 export namespace Verify {
@@ -25,6 +24,16 @@ export namespace API {
                         activated: boolean;
                         access_token: string;
                     }
+                }
+            }
+        }
+        export namespace Login {
+            export namespace POST {
+                export interface RequestBody {
+                    google_id_token: string;
+                }
+                export interface Response {
+                    access_token: string;
                 }
             }
         }

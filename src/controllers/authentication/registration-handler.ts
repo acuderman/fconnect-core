@@ -3,14 +3,14 @@ import { DecodedGoogleIdToken, getIdTokenInfo } from '../../services/google';
 import {
   activateUser,
   createUser,
-  getExistingUsersWithOneOfEmails, getUserById,
+  getExistingUsersWithOneOfEmails,
+  getUserByGoogleEmail,
   UsersWithStudentEmailWithCount
 } from '../../dao/user';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '../../models/user';
 import { sendRegistrationMail } from '../../services/send-mail';
-import { generateJwtToken, verifyBearerToken } from '../../setup/jwt';
-import { ExtendedProtectedRequest } from '../../setup/interfaces';
+import { generateJwtToken } from '../../setup/jwt';
 
 export async function registerIdentityHandler (body: API.V1.Register.POST.RequestBody): Promise<API.V1.Register.POST.Response> {
   const { student_email, google_id_token }: API.V1.Register.POST.RequestBody = body;
@@ -29,11 +29,7 @@ export async function registerIdentityHandler (body: API.V1.Register.POST.Reques
   const newUser: User = await addNewUser(student_email, decodedIdToken.email);
   await sendRegistrationMail(student_email, newUser.tracking_id);
 
-  const access_token: string = generateJwtToken(newUser.id, false)
-
-  return {
-    access_token,
-  }
+  return {}
 }
 
 async function decodeGoogleIdToken (idToken: string): Promise<DecodedGoogleIdToken> {
@@ -74,36 +70,24 @@ function getExpiresAtDate (): Date {
   return new Date(currentDate.getFullYear(), 9, 1, 0, 0, 0, 0);
 }
 
-export async function swapAccessTokenHandler(req: ExtendedProtectedRequest<{}, {}, {}>): Promise<API.V1.Register.GET.Activated.Response> {
-  try {
-    verifyBearerToken(req);
-  } catch (e) {
-    throw new Error('ERR_INVALID_TOKEN');
-  }
+export async function loginHandler (body: API.V1.Login.POST.RequestBody): Promise<API.V1.Login.POST.Response> {
+  const { google_id_token }: API.V1.Login.POST.RequestBody = body;
 
-  const user_id: string = req.tokenData.user_id;
-  const user: User | null = await getUserById(user_id);
+  const decodedIdToken: DecodedGoogleIdToken = await decodeGoogleIdToken(google_id_token);
+
+  const user: User | null = await getUserByGoogleEmail(decodedIdToken.email);
 
   if (user === null) {
-    throw new Error('ERR_USER_DOES_NOT_EXIST')
-  }
-  
-  if (user.activated) {
-    const access_token: string = generateJwtToken(user_id, true);
-    
-    return {
-      activated: true,
-      access_token,
-    }
+    throw new Error('ERR_USER_DOES_NOT_EXIST');
   }
 
-  const access_token: string = generateJwtToken(user_id, false);
+  if (!user.activated) {
+    throw new Error('ERR_USER_NOT_ACTIVATED')
+  }
+
+  const access_token: string = generateJwtToken(user.id);
 
   return {
-    activated: false,
     access_token,
   }
 }
-
-// TODO add login route that checks google id token, checks in db if user has activated account and issues access token
-// Othervise it returns activated: false with false access token so we can send him to waiting screen

@@ -2,8 +2,7 @@ import { app } from '../../index';
 import { Method } from './interfaces';
 import { NextFunction, Request, Response } from 'express';
 import { throwException } from '../errors';
-import { validateSchema } from '../validate';
-import { SchemaMap } from 'joi';
+import { validateSchema, ValidationRules } from '../validate';
 import { verifyBearerToken } from '../jwt';
 import { ExtendedProtectedRequest } from '../interfaces';
 
@@ -42,7 +41,7 @@ export class Router {
     route: string,
     version: number,
     controller: ControllerFunction,
-    schema: SchemaMap,
+    schema: ValidationRules,
     method: Method,
     middleware?: MiddlwewareFunction,
   ): void {
@@ -57,11 +56,6 @@ export class Router {
     try {
       verifyBearerToken(req as ExtendedProtectedRequest<any, any, any>)
 
-      if (!((req as ExtendedProtectedRequest<any, any, any>).tokenData.activated)) {
-        const message = 'ERR_NOT_ACTIVATED';
-        return throwException(message, res);
-      }
-
       next();
     } catch (e) {
       const message = 'ERR_INVALID_TOKEN';
@@ -73,7 +67,7 @@ export class Router {
     route: string,
     version: number,
     controller: ControllerFunction,
-    schema: SchemaMap,
+    schema: ValidationRules,
     method: Method,
     middleware?: MiddlwewareFunction,
   ): void {
