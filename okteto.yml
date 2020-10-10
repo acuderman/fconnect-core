@@ -1,4 +1,4 @@
-name: fconnect-core-deployment
+name: fconnect-core
 image: okteto/node:12
 command: bash
 sync:
