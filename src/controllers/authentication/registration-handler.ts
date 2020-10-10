@@ -5,31 +5,32 @@ import {
   createUser,
   getExistingUsersWithOneOfEmails,
   getUserByGoogleEmail,
-  UsersWithStudentEmailWithCount
+  // UsersWithStudentEmailWithCount
 } from '../../dao/user';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '../../models/user';
 import { sendRegistrationMail } from '../../services/send-mail';
 import { generateJwtToken } from '../../setup/jwt';
 
-export async function registerIdentityHandler (body: API.V1.Register.POST.RequestBody): Promise<API.V1.Register.POST.Response> {
-  const { student_email, google_id_token }: API.V1.Register.POST.RequestBody = body;
+export async function registerIdentityHandler (body: API.V1.Register.POST.RequestBody): Promise<any> {
+  const { student_email }: API.V1.Register.POST.RequestBody = body;
 
-  if (!student_email.endsWith('student.upr.si')) {
-    throw new Error('ERR_NOT_FAMNIT_EMAIL');
-  }
-  const decodedIdToken: DecodedGoogleIdToken = await decodeGoogleIdToken(google_id_token);
+  // if (!student_email.endsWith('student.upr.si')) {
+  //   throw new Error('ERR_NOT_FAMNIT_EMAIL');
+  // }
+  // const decodedIdToken: DecodedGoogleIdToken = await decodeGoogleIdToken(google_id_token);
   
-  const existingUsers: UsersWithStudentEmailWithCount = await getExistingUsersWithOneOfEmails(student_email, decodedIdToken.email);
+  // const existingUsers: UsersWithStudentEmailWithCount = await getExistingUsersWithOneOfEmails(student_email, decodedIdToken.email);
 
-  if (existingUsers.count > 0) {
-    throw new Error('ERR_USER_WITH_THAT_EMAIL_ALREADY_EXISTS');
-  }
+  // if (existingUsers.count > 0) {
+  //   throw new Error('ERR_USER_WITH_THAT_EMAIL_ALREADY_EXISTS');
+  // }
 
-  const newUser: User = await addNewUser(student_email, decodedIdToken.email);
+  // const newUser: User = await addNewUser(student_email, decodedIdToken.email);
+  const newUser: User = await addNewUser(student_email, 'cuderman.andraz@gmail.com');
   await sendRegistrationMail(student_email, newUser.tracking_id);
 
-  return {}
+  return getExistingUsersWithOneOfEmails(student_email, 'cuderman.andraz@gmail.com')
 }
 
 async function decodeGoogleIdToken (idToken: string): Promise<DecodedGoogleIdToken> {

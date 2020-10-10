@@ -1,4 +1,5 @@
 import dotenv from 'dotenv'
+import { exec } from 'child_process'
 
 dotenv.config();
 
@@ -10,16 +11,30 @@ export const SERVER_PRIVATE_KEY: string | undefined = process.env.SERVER_PRIVATE
 export const GOOGLE_API_BASE_URL: string = 'https://oauth2.googleapis.com/';
 
 
-export function initConfig (): void {
+export async function initConfig (): Promise<void> {
   if (!checkEnvironmentVariables()) {
     // eslint-disable-next-line no-console
     console.log('ERR_INVALID_ENVIRONMENT_VARIABLES');
     process.exit(1);
   }
+
+  await initDatabase()
 }
 
 function checkEnvironmentVariables (): boolean {
   return DATABASE_CONNECTION_URL !== undefined
       && SENDGRID_API_KEY !== undefined
       && BASE_URI !== undefined
+}
+
+async function initDatabase (): Promise<void> {
+  await new Promise((resolve, reject) => {
+    const migrate = exec(
+      `npx sequelize-cli db:migrate --url ${DATABASE_CONNECTION_URL}`,
+      err => (err ? reject(err): resolve())
+    );
+
+    migrate.stdout?.pipe(process.stdout);
+    migrate.stderr?.pipe(process.stderr);
+  });
 }

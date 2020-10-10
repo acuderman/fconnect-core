@@ -1,0 +1,30 @@
+version: '3.3'
+services:
+  fconnect-core:
+    build: .
+    ports:
+      - "9998:9998"
+    depends_on:
+      - mysql-fc
+    environment:
+      PORT: 9998
+      DATABASE_CONNECTION_URL: 'mysql://root@127.0.0.1:33306/database_production'
+      SENDGRID_API_KEY: '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'
+      BASE_URL: 'http://localhost:3000'
+      SERVER_PRIVATE_KEY: 'elfmdslfkdsmfkldsnfsdmlfndsfnsmlsa12321'
+  mysql-fc:
+    restart: always
+    container_name: mysql-fc
+    image: mysql:5.7
+    environment:
+      - MYSQL_HOST=0.0.0.0
+      - MYSQL_PORT=33306
+      - MYSQL_USER=root
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "33306:3306"
+    entrypoint:
+      sh -c "
+      echo 'CREATE DATABASE IF NOT EXISTS database_production; CREATE DATABASE IF NOT EXISTS database_development; CREATE DATABASE IF NOT EXISTS database_test; CREATE DATABASE IF NOT EXISTS hydra_development; CREATE DATABASE IF NOT EXISTS attestations;' > /docker-entrypoint-initdb.d/init.sql;
+      /usr/local/bin/docker-entrypoint.sh --sql-mode="NO_ENGINE_SUBSTITUTION"  --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+

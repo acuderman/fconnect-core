@@ -4,7 +4,7 @@ import { initRoutes } from './routes';
 import bodyParser from 'body-parser'
 
 const app: express.Express = express()
-const port: string | number = process.env.PORT || 3000
+const port: string | number = process.env.PORT || 9998
 
 app.listen(port, () => {
   // eslint-disable-next-line no-console
@@ -13,8 +13,9 @@ app.listen(port, () => {
 
 app.use(bodyParser.json())
 
-initConfig();
-initRoutes();
+initConfig().then(() => {
+  initRoutes();
+});
 
 export {
   app

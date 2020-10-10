@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fconnect-core-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: fconnect-core
+  template:
+    metadata:
+      labels:
+        component: fconnect-core
+    spec:
+      containers:
+        - name: fconnect-core
+          image: cudr12/fconnect-core
+          ports:
+            - containerPort: 9998
+          env:
+            - name: DATABASE_CONNECTION_URL
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: connection
+            - name: SENDGRID_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: sendgrid-api-key
+            - name: BASE_URL
+              value: http://localhost:3000
+            - name: SERVER_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: server-private-key
