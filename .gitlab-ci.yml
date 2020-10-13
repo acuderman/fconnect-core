@@ -35,7 +35,9 @@ cache:
 
 k8s:
   stage: deploy
-  image: bitnami/kubectl
+  image:
+    name: bitnami/kubectl
+    entrypoint: [ "" ]
   variables:
     KUBECONFIG: $KUBERNETES_CONFIGURATION
   script:
