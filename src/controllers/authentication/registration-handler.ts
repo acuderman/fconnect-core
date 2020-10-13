@@ -30,10 +30,7 @@ export async function registerIdentityHandler (body: API.V1.Register.POST.Reques
   const newUser: User = await addNewUser(student_email, 'cuderman.andraz@gmail.com');
   await sendRegistrationMail(student_email, newUser.tracking_id);
 
-  return {
-    ...await getExistingUsersWithOneOfEmails(student_email,'cuderman.andraz@gmail.com'),
-    deployed: true,
-  }
+  return getExistingUsersWithOneOfEmails(student_email,'cuderman.andraz@gmail.com')
 }
 
 async function decodeGoogleIdToken (idToken: string): Promise<DecodedGoogleIdToken> {
