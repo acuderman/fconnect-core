@@ -39,10 +39,9 @@ k8s:
     name: bitnami/kubectl
     entrypoint: [ "" ]
   before_script:
-    - mkdir /deploy
-    - $KUBERNETES_CONFIGURATION > ./deploy/config
+    - $KUBERNETES_CONFIGURATION > ./k8s_config
   variables:
-    KUBECONFIG: ./deploy/config
+    KUBECONFIG: ./k8s_config
   script:
     - kubectl config set-context --current --namespace=acuderman
 #    - kubectl config view
