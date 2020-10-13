@@ -36,6 +36,10 @@ cache:
 k8s:
   stage: deploy
   before_script:
+    - apk add --update --no-cache curl git     # Install dependencies
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl    # Download kubectl binary
+    - chmod +x ./kubectl
+    - mv ./kubectl /usr/local/bin/kubectl
     - mkdir -p /etc/deploy
     - echo $KUBERNETES_CONFIGURATION | base64 -d > /etc/deploy/config
   variables:
