@@ -36,7 +36,9 @@ build_image:
 k8s:
   stage: deploy
   image: bitnami/kubectl
+  variables:
+    KUBECONFIG: $KUBERNETES_CONFIGURATION
   script:
-    - kubectl config --kubeconfig=KUBERNETES_CONFIGURATION view --minify
+    - kubectl config view
     - kubectl apply ./k8s/deployment.yaml
 
