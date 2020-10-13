@@ -12,7 +12,7 @@ image: docker:19.03.12
 # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
 stages:
   - build
-  - k8s
+  - deploy
 
 cache:
   key: "$CI_COMMIT_REF_NAME"
