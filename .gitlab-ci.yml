@@ -46,6 +46,5 @@ k8s:
     KUBECONFIG: /etc/deploy/config
   script:
     - kubectl config set-context --current --namespace=acuderman
-    - kubectl delete -f ./k8s/deployment.yaml
-    - kubectl apply -f ./k8s/deployment.yaml
+    - kubectl replace -f ./k8s/deployment.yaml
 
