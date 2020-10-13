@@ -1,0 +1,35 @@
+image: node:12
+
+# Pick zero or more services to be used on all builds.
+# Only needed when using a docker container to run your tests in.
+# Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-a-service
+#services:
+#  - mysql:latest
+#  - redis:latest
+#  - postgres:latest
+
+# This folder is cached between builds
+# http://docs.gitlab.com/ce/ci/yaml/README.html#cache
+stages:
+  - build
+  - upload
+
+cache:
+  key: "$CI_COMMIT_REF_NAME"
+  paths:
+    - node_modules/
+
+build:
+  stage: build
+  variables:
+    NODE_ENV: production
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
+    - docker build -t cudr12/fconnect-core .
+    - docker push cudr12/fconnect-core
+
+#upload_image:
+#  stage: upload
+#  script:
+#    - npm install
+#    - node ./specs/start.js ./specs/db-postgres.spec.js
