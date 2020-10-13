@@ -47,5 +47,5 @@ k8s:
   script:
     - kubectl config set-context --current --namespace=acuderman
     - kubectl config view
-    - kubectl apply ./k8s/deployment.yaml
+    - kubectl apply -f ./k8s/deployment.yaml
 
