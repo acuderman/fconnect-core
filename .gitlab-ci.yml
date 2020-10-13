@@ -29,7 +29,7 @@ build_image:
     - export DOCKER_HOST='tcp://docker:2375/'
     - export DOCKER_DRIVER='overlay2'
   script:
-    - echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_USER -p --password-stdin
+    - echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_USER --password-stdin
     - docker build -t cudr12/fconnect-core .
     - docker push cudr12/fconnect-core
 
@@ -47,4 +47,3 @@ k8s:
   script:
     - kubectl config set-context --current --namespace=acuderman
     - kubectl replace --force -f ./k8s/deployment.yaml
-
