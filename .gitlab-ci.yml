@@ -35,15 +35,13 @@ cache:
 
 k8s:
   stage: deploy
-  image:
-    name: bitnami/kubectl
-    entrypoint: [ "" ]
   before_script:
-    - $KUBERNETES_CONFIGURATION > ./k8s_config
+    - mkdir -p /etc/deploy
+    - echo $KUBERNETES_CONFIGURATION | base64 -d > /etc/deploy/config
   variables:
-    KUBECONFIG: ./k8s_config
+    KUBECONFIG: /etc/deploy/config
   script:
     - kubectl config set-context --current --namespace=acuderman
-#    - kubectl config view
-#    - kubectl apply ./k8s/deployment.yaml
+    - kubectl config view
+    - kubectl apply ./k8s/deployment.yaml
 
