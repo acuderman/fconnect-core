@@ -42,6 +42,6 @@ k8s:
     KUBECONFIG: $KUBERNETES_CONFIGURATION
   script:
     - kubectl config set-context --current --namespace=acuderman
-    - kubectl config view
-    - kubectl apply ./k8s/deployment.yaml
+#    - kubectl config view
+#    - kubectl apply ./k8s/deployment.yaml
 
