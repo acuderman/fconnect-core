@@ -33,7 +33,7 @@ build_image:
     - docker build -t cudr12/fconnect-core .
     - docker push cudr12/fconnect-core
 
-k8s:
+deploy_dev:
   stage: deploy
   before_script:
     - apk add --update --no-cache curl git     # Install dependencies
