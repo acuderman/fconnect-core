@@ -2,3 +2,4 @@
 .idea
 .env
 build
+/k8s/db/secrets.yaml
