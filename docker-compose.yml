@@ -9,9 +9,9 @@ services:
     environment:
       PORT: 9998
       DATABASE_CONNECTION_URL: 'mysql://root@127.0.0.1:33306/database_production'
-      SENDGRID_API_KEY: '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'
+      SENDGRID_API_KEY: ''
       BASE_URL: 'http://localhost:3000'
-      SERVER_PRIVATE_KEY: 'elfmdslfkdsmfkldsnfsdmlfndsfnsmlsa12321'
+      SERVER_PRIVATE_KEY: 'etrztrzrtzS'
   mysql-fc:
     restart: always
     container_name: mysql-fc
