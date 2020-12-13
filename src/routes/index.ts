@@ -2,6 +2,8 @@ import { Router } from '../setup/router';
 import { registerController, verifyEmailController, loginController } from '../controllers/authentication/registration-controller';
 import joi from 'joi'
 import { Method } from '../setup/router/interfaces';
+import { API } from '../exposed-interfaces'
+import { ValidationSchema } from '../setup/validate'
 
 export function initRoutes (): void {
   const router: Router = new Router();
@@ -9,15 +11,17 @@ export function initRoutes (): void {
 }
 
 function addRegistrationRoutes(router: Router): void {
-  router.exposed(
+  const registerBodyValidation: ValidationSchema<API.V1.Register.POST.RequestBody> = {
+    google_id_token: joi.string().required(),
+    student_email: joi.string().email().required(),
+  }
+
+  router.exposed (
     'register',
     1,
     registerController,
     {
-      body: {
-        google_id_token: joi.string().required(),
-        student_email: joi.string().email().required(),
-      },
+      body: registerBodyValidation,
     },
     Method.post,
   )
