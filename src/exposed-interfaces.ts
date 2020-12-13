@@ -10,14 +10,8 @@ export namespace API {
           google_id_token: string;
           student_email: string;
           a: {
-            b: {
-              // b: string
-              c: Asd
-            }
+            b: string
           }
-        }
-        interface Asd {
-          b: string
         }
         // eslint-disable-next-line @typescript-eslint/no-empty-interface
         export interface Response {}
