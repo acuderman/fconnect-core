@@ -1,8 +1,9 @@
-import joi, { SchemaLike, SchemaMap } from 'joi'
+import joi, { SchemaLike, Schema } from 'joi'
+
 import { NextFunction, Request, Response } from 'express';
 import { throwException } from '../errors';
 
-export type ValidationSchema <T extends object> = {
+export type ValidationSchema <T> = {
   [key in keyof T]: SchemaLike | SchemaLike[];
 };
 
@@ -23,7 +24,7 @@ export function validateSchema (rules: ValidationRules): (req: Request, res: Res
         const reqSchema: OptionalSchemaMap | undefined = rules[reqParameter as keyof ValidationRules];
 
         // TODO: validate if this cast works
-        const schema = joi.object(reqSchema as SchemaMap);
+        const schema: Schema = joi.object(reqSchema);
         await schema.validate(req[reqParameter as keyof ValidationRules])
       }));
 

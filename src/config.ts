@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import { exec } from 'child_process'
+// import { exec } from 'child_process'
 
 dotenv.config();
 
@@ -18,7 +18,7 @@ export async function initConfig (): Promise<void> {
     process.exit(1);
   }
 
-  await initDatabase()
+  // await initDatabase()
 }
 
 function checkEnvironmentVariables (): boolean {
@@ -26,15 +26,15 @@ function checkEnvironmentVariables (): boolean {
       && SENDGRID_API_KEY !== undefined
       && BASE_URI !== undefined
 }
-
-async function initDatabase (): Promise<void> {
-  await new Promise((resolve, reject) => {
-    const migrate = exec(
-      `npx sequelize-cli db:migrate --url ${DATABASE_CONNECTION_URL}`,
-      err => (err ? reject(err): resolve())
-    );
-
-    migrate.stdout?.pipe(process.stdout);
-    migrate.stderr?.pipe(process.stderr);
-  });
-}
+//
+// async function initDatabase (): Promise<void> {
+//   await new Promise((resolve, reject) => {
+//     const migrate = exec(
+//       `npx sequelize-cli db:migrate --url ${DATABASE_CONNECTION_URL}`,
+//       err => (err ? reject(err): resolve())
+//     );
+//
+//     migrate.stdout?.pipe(process.stdout);
+//     migrate.stderr?.pipe(process.stderr);
+//   });
+// }

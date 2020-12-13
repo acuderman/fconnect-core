@@ -5,9 +5,10 @@ import { throwException } from '../errors';
 import { validateSchema, ValidationRules } from '../validate';
 import { verifyBearerToken } from '../jwt';
 import { ExtendedProtectedRequest } from '../interfaces';
+import { generateSwagger } from '../swagger/generate'
 
 type MiddlwewareFunction = (req: Request, res: Response, next: NextFunction) => void
-type ControllerFunction = (req: Request<any>, res: Response, next: NextFunction) => object | Promise<object>
+type ControllerFunction = (req: Request<any>, res: Response, next: NextFunction) => Record<string, any> | Promise<Record<string, any>>
 
 export class Router {
   private returnResponseFromController (
@@ -16,7 +17,7 @@ export class Router {
   ): (req: Request, res: Response, next: NextFunction) => Promise<Response> {
     return async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
       try {
-        const controllerResponse: object | void = await controller(req, res, next);
+        const controllerResponse: Record<string, any> | void = await controller(req, res, next);
         const responseCode: number = this.determineResponseCode(method);
 
         return res.status(responseCode).json(controllerResponse)
@@ -45,6 +46,9 @@ export class Router {
     method: Method,
     middleware?: MiddlwewareFunction,
   ): void {
+    // TODO: Add swagger generation utility for params. Should be added also for response.
+    generateSwagger()
+
     app[method](
       `/v${version}/${route}`,
       validateSchema(schema),
