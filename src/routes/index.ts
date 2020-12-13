@@ -11,10 +11,25 @@ export function initRoutes (): void {
 }
 
 function addRegistrationRoutes(router: Router): void {
-  const registerBodyValidation: ValidationSchema<API.V1.Register.POST.RequestBody> = {
-    google_id_token: joi.string().required(),
+  const registerBodyValidation = {
+    google_id_token: joi.string(),
     student_email: joi.string().email().required(),
   }
+
+  type Map<T> =
+    T extends joi.StringSchema ? string :
+      T extends joi.NumberSchema ? number :
+        T extends joi.BooleanSchema ? boolean :
+          any;
+
+  type MapObject<T> = {
+    [K in keyof T]: Map<T[K]>
+  }
+
+  type dsfds = Map<typeof registerBodyValidation.google_id_token>
+
+  type Type = MapObject<typeof registerBodyValidation>
+  // TODO: https://github.com/TCMiranda/joi-extract-type
 
   router.exposed (
     'register',

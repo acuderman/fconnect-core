@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import { throwException } from '../errors';
 
 export type ValidationSchema <T> = {
-  [key in keyof T]: SchemaLike | SchemaLike[];
+  [key in keyof T]: SchemaLike | SchemaLike[] | T[keyof T];
 };
 
 interface OptionalSchemaMap {
@@ -12,9 +12,9 @@ interface OptionalSchemaMap {
 }
 
 export interface ValidationRules {
-    params?: OptionalSchemaMap;
-    body?: OptionalSchemaMap;
-    query?: OptionalSchemaMap;
+  params?: OptionalSchemaMap;
+  body?: OptionalSchemaMap;
+  query?: OptionalSchemaMap;
 }
 
 export function validateSchema (rules: ValidationRules): (req: Request, res: Response, next: NextFunction) => Promise<void | Response>  {
