@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import { throwException } from '../errors';
 
 export type ValidationSchema <T> = {
-  [key in keyof T]: SchemaLike | SchemaLike[] | T[keyof T];
+  [key in keyof T]: SchemaLike | SchemaLike[] | ValidationSchema<T[keyof T]>;
 };
 
 interface OptionalSchemaMap {
