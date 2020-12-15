@@ -9,9 +9,6 @@ export namespace API {
         export interface RequestBody {
           google_id_token: string;
           student_email: string;
-          a: {
-            b: string
-          }
         }
         // eslint-disable-next-line @typescript-eslint/no-empty-interface
         export interface Response {}

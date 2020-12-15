@@ -5,7 +5,7 @@ import { throwException } from '../errors';
 import { validateSchema, ValidationRules } from '../validate';
 import { verifyBearerToken } from '../jwt';
 import { ExtendedProtectedRequest } from '../interfaces';
-import { generateSwagger } from '../swagger/generate'
+import * as swagger from '../swagger/generate'
 
 type MiddlwewareFunction = (req: Request, res: Response, next: NextFunction) => void
 type ControllerFunction = (req: Request<any>, res: Response, next: NextFunction) => Record<string, any> | Promise<Record<string, any>>
@@ -46,11 +46,11 @@ export class Router {
     method: Method,
     middleware?: MiddlwewareFunction,
   ): void {
-    // TODO: Add swagger generation utility for params. Should be added also for response.
-    generateSwagger()
+    const path: string = `/v${version}/${route}`
+    swagger.build(path, schema, method)
 
     app[method](
-      `/v${version}/${route}`,
+      path,
       validateSchema(schema),
       middleware !== undefined ? middleware : (_req: Request, _res: Response, next: NextFunction): void => { next(); },
       this.returnResponseFromController(controller, method))
