@@ -34,7 +34,6 @@ function constructParameters (paramType: 'path' | 'query', params: OptionalSchem
   })
 }
 
-// TODO: not tested
 function constructErrorSchemas (errors: ErrorData[]) {
   const errorSchemas: Record<string, any> = {}
 
@@ -44,12 +43,15 @@ function constructErrorSchemas (errors: ErrorData[]) {
       ? {
         description: 'Error',
         content: {
-          oneOf: {
-            schema: errorSchema
+          'application/json': {
+            schema: {
+              oneOf: [errorSchema, errorSchema]
+            },
           }
         }
       }
-      : errorSchemas[error.status].content.oneOf.schema.push(errorSchema)
+      // TODO: push doesn't work properly
+      : errorSchemas[error.status].content['application/json'].schema.oneOf.push(errorSchema)
   })
 
   return errorSchemas
