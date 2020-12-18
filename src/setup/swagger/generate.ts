@@ -5,9 +5,17 @@ import { OptionalSchemaMapJoiObject, ValidationRules } from '../validate'
 import { Method } from '../router/interfaces'
 import joi from 'joi'
 import { inspect } from 'util'
+import { ErrorData } from '../errors'
 
-// let swaggerDefinitions = {}
-//
+interface ApiDefinition {
+  path: string,
+  schema: ValidationRules,
+  method: Method,
+  response: OptionalSchemaMapJoiObject,
+  responseCode: number,
+  errors: ErrorData[],
+}
+
 function constructParameters (paramType: 'path' | 'query', params: OptionalSchemaMapJoiObject | undefined): Record<string, string>[] {
   if (params === undefined) {
     return []
@@ -26,8 +34,55 @@ function constructParameters (paramType: 'path' | 'query', params: OptionalSchem
   })
 }
 
-function documentApi (path: string, schema: ValidationRules, method: Method) {
-  const path1 = path + 'aasd/:asd'
+// TODO: not tested
+function constructErrorSchemas (errors: ErrorData[]) {
+  const errorSchemas: Record<string, any> = {}
+
+  errors.map((error: ErrorData) => {
+    const errorSchema = constructErrorResponse(error)
+    errorSchemas[error.status] = errorSchemas[error.status] === undefined
+      ? {
+        description: 'Error',
+        content: {
+          oneOf: {
+            schema: errorSchema
+          }
+        }
+      }
+      : errorSchemas[error.status].content.oneOf.schema.push(errorSchema)
+  })
+
+  return errorSchemas
+}
+
+function constructErrorResponse (error: ErrorData) {
+  return {
+    type: 'object',
+    additionalProperties: false,
+    'properties': {
+      'status': {
+        'type': 'integer',
+        'format': 'int32',
+        'example': error.status
+      },
+      'error_code': {
+        'type': 'string',
+        'example': error.err_code
+      },
+      'message': {
+        'type': 'string',
+        'example': error.message
+      },
+      'required': [
+        'error_code',
+        'message',
+        'status'
+      ]
+    }
+  }
+}
+
+function documentApi (apiDefinition: ApiDefinition) {
   return {
     'info': {
       'title': 'Service name',
@@ -35,36 +90,37 @@ function documentApi (path: string, schema: ValidationRules, method: Method) {
       'description': 'API for service name',
       'contact': {
         'name': 'Me',
-        'email': 'Me',
+        'email': 'test@g.com',
         'url': ''
       }
     },
     'openapi': '3.0.0',
     paths: {
-      [path1]: {
-        [method]: {
+      [apiDefinition.path]: {
+        [apiDefinition.method]: {
           parameters: [
             ...constructParameters('path', joi.object({
               asd: joi.string().required()
             })),
-            ...constructParameters('query', schema.query)
+            ...constructParameters('query', apiDefinition.schema.query)
           ],
           requestBody: {
             content: {
               'application/json': {
-                schema: convert(schema.body ?? joi.object({}), false)
+                schema: convert(apiDefinition.schema.body ?? joi.object({}), false)
               }
             }
           },
           responses: {
-            '200': {
+            [apiDefinition.responseCode]: {
               description: 'ok',
               'content': {
                 'application/json': {
-                  schema: convert(joi.object({}), false)
+                  schema: convert(apiDefinition.response ?? joi.object({}), false)
                 }
               }
-            }
+            },
+            ...constructErrorSchemas(apiDefinition.errors),
           }
         }
       },
@@ -72,16 +128,9 @@ function documentApi (path: string, schema: ValidationRules, method: Method) {
   }
 }
 
-export function build (path: string, schema: ValidationRules, method: Method): void {
-  // Object.keys(schema).map((param: string) => {
-  //   const rules: OptionalSchemaMapJoiObject | undefined = schema[param as keyof ValidationRules]
-  //
-  //   if (rules !== undefined) {
-  //     const swagger = convert(rules, true);
-  //     console.log(swagger, path, method)
-  //   }
-  // })
-  const swagger = documentApi(path, schema, method)
+export function build (apiDefinition: ApiDefinition): void {
+  const swagger = documentApi(apiDefinition)
+
   console.log('dslfdmsfkdsm')
   console.log(inspect(swagger, {
     showHidden: false,

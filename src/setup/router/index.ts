@@ -1,11 +1,12 @@
 import { app } from '../../index';
 import { Method } from './interfaces';
 import { NextFunction, Request, Response } from 'express';
-import { throwException } from '../errors';
+import { errorList, throwException } from '../errors'
 import { validateSchema, ValidationRules } from '../validate';
 import { verifyBearerToken } from '../jwt';
 import { ExtendedProtectedRequest } from '../interfaces';
 import * as swagger from '../swagger/generate'
+import joi from 'joi'
 
 type MiddlwewareFunction = (req: Request, res: Response, next: NextFunction) => void
 type ControllerFunction = (req: Request<any>, res: Response, next: NextFunction) => Record<string, any> | Promise<Record<string, any>>
@@ -47,7 +48,14 @@ export class Router {
     middleware?: MiddlwewareFunction,
   ): void {
     const path: string = `/v${version}/${route}`
-    swagger.build(path, schema, method)
+    swagger.build({
+      path,
+      schema,
+      method,
+      errors: [errorList['VALIDATION_ERROR']],
+      responseCode: 200,
+      response: joi.object({})
+    })
 
     app[method](
       path,
