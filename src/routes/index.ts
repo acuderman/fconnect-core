@@ -9,26 +9,41 @@ import {
 import joi from 'joi'
 import { Method } from '../setup/router/interfaces'
 import { API } from '../exposed-interfaces'
-import { ValidationSchema } from '../setup/validate'
 import { errorList } from '../setup/errors'
+import * as schemaValidator from '../setup/validate'
 
 export function initRoutes (): void {
   const router: Router = new Router();
   addRegistrationRoutes(router);
 }
 
-function addRegistrationRoutes(router: Router): void {
-  const registerBodyValidation: ValidationSchema<API.V1.Register.POST.RequestBody> = joi.object({
+namespace Schemas {
+  export const registerBodyValidation: joi.ObjectSchema = schemaValidator.required<API.V1.Register.POST.RequestBody>({
     google_id_token: joi.string().required(),
-    student_email: joi.string().email().required(),
-  }).required()
+    student_email: joi.string().required(),
+  })
+  export const registerResponse: joi.ObjectSchema = schemaValidator.optional<API.V1.Register.POST.Response>({})
+
+  export const verifyTrackingIdParams: joi.ObjectSchema = schemaValidator.required<API.V1.Register.GET.Verify.RequestParams> ({
+    tracking_id: joi.string().required(),
+  })
+
+  export const loginBody: joi.ObjectSchema = schemaValidator.required<API.V1.Login.POST.RequestBody> ({
+    google_id_token: joi.string().required(),
+  })
+  export const loginResponse: joi.ObjectSchema = schemaValidator.required<API.V1.Login.POST.Response> ({
+    access_token: joi.string().required(),
+  })
+}
+
+function addRegistrationRoutes(router: Router): void {
 
   router.exposed (
     {
       method: Method.post,
-      response: joi.object({}),
+      response: Schemas.registerResponse,
       schema: {
-        body: registerBodyValidation,
+        body: Schemas.registerBodyValidation,
       },
       response_description: 'void',
       description: 'Register new account',
@@ -41,16 +56,14 @@ function addRegistrationRoutes(router: Router): void {
     [],
   )
 
-  const verifyTrackingIdParams: ValidationSchema<API.V1.Register.GET.Verify.RequestParams> = joi.object({
-    tracking_id: joi.string().required(),
-  }).required()
+
 
   router.exposed(
     {
       method: Method.get,
-      response: joi.string(),
+      response: joi.string().required(),
       schema: {
-        params: verifyTrackingIdParams,
+        params: Schemas.verifyTrackingIdParams,
       },
       response_description: 'Success message',
       description: 'Verify tracking id',
@@ -63,19 +76,12 @@ function addRegistrationRoutes(router: Router): void {
     [],
   )
 
-  const loginBody: ValidationSchema<API.V1.Login.POST.RequestBody> = joi.object({
-    google_id_token: joi.string().required(),
-  })
-  const loginResponse: ValidationSchema<API.V1.Login.POST.Response> = joi.object({
-    access_token: joi.string().required(),
-  }).required()
-
   router.exposed(
     {
       method: Method.post,
-      response: loginResponse,
+      response: Schemas.loginResponse,
       schema: {
-        body: loginBody
+        body: Schemas.loginBody,
       },
       response_description: 'Returns access token',
       description: 'User login',

@@ -10,6 +10,10 @@ export type ValidationSchema <T> = joi.ObjectSchema<{
   [key in keyof T]: SchemaLike | SchemaLike[] | ValidationSchema<T[keyof T]>;
 }>;
 
+export type SchemaObject <T> = {
+  [key in keyof T]: SchemaLike | SchemaLike[] | SchemaObject<T[keyof T]>;
+}
+
 interface OptionalSchemaMap {
   [key: string]: SchemaLike | SchemaLike[] | undefined;
 }
@@ -19,6 +23,14 @@ export interface ValidationRules {
   params?: OptionalSchemaMapJoiObject;
   body?: OptionalSchemaMapJoiObject;
   query?: OptionalSchemaMapJoiObject;
+}
+
+export function required<T>(schema: SchemaObject<T>): joi.ObjectSchema {
+  return joi.object(schema).required()
+}
+
+export function optional<T>(schema: SchemaObject<T>): joi.ObjectSchema {
+  return joi.object(schema).optional()
 }
 
 export function validateSchema (rules: ValidationRules): (req: Request, res: Response, next: NextFunction) => Promise<void | Response>  {
