@@ -31,8 +31,11 @@ paths:
               properties:
                 google_id_token:
                   type: "string"
+                student_email:
+                  type: "string"
               required:
                 - "google_id_token"
+                - "student_email"
               additionalProperties: false
       responses:
         204:

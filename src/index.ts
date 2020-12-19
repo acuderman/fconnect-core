@@ -1,5 +1,4 @@
 import { initConfig } from './config';
-import './routes';
 import { initRoutes } from './routes'
 import { Router } from './setup/router'
 

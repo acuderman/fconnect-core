@@ -1,5 +1,4 @@
 import { Router } from '../setup/router'
-// import { registerController, verifyEmailController, loginController } from '../controllers/authentication/registration-controller';
 import {
   loginController,
   registerController,

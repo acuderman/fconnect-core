@@ -1,7 +1,7 @@
 import { initRoutes } from './routes'
 import * as swagger from './setup/swagger/generate'
 
-
+// eslint-disable-next-line no-console
 console.log('Building swagger')
 swagger.addApiHeader({
   openapi: '3.0.0',
