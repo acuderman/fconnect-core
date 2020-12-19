@@ -1,23 +1,29 @@
-import { app } from '../../index';
-import { Method } from './interfaces';
-import { NextFunction, Request, Response } from 'express';
-import { throwException } from '../errors';
-import { validateSchema, ValidationRules } from '../validate';
-import { verifyBearerToken } from '../jwt';
-import { ExtendedProtectedRequest } from '../interfaces';
+import express, { NextFunction, Request, Response } from 'express'
+import { throwException } from '../errors'
+import { validateSchema } from '../validate'
+import { verifyBearerToken } from '../jwt'
+import { ExtendedProtectedRequest } from '../interfaces'
+import * as swagger from '../swagger/generate'
+import { ApiDefinition, ApiProtection } from '../swagger/generate'
+import bodyParser from 'body-parser'
 
 type MiddlwewareFunction = (req: Request, res: Response, next: NextFunction) => void
-type ControllerFunction = (req: Request<any>, res: Response, next: NextFunction) => object | Promise<object>
+type ControllerFunction = (req: Request<any>, res: Response, next: NextFunction) => Record<string, any> | Promise<Record<string, any>>
 
 export class Router {
+  public static app: express.Express = express()
+
+  constructor() {
+    Router.app.use(bodyParser.json())
+  }
+
   private returnResponseFromController (
     controller: ControllerFunction,
-    method: Method
+    responseCode: number,
   ): (req: Request, res: Response, next: NextFunction) => Promise<Response> {
     return async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
       try {
-        const controllerResponse: object | void = await controller(req, res, next);
-        const responseCode: number = this.determineResponseCode(method);
+        const controllerResponse: Record<string, any> | void = await controller(req, res, next);
 
         return res.status(responseCode).json(controllerResponse)
       } catch (e) {
@@ -26,30 +32,25 @@ export class Router {
     }
   }
 
-  private determineResponseCode (method: Method): number {
-    switch (method) {
-    case Method.get:
-      return 200;
-    case Method.post:
-      return 201;
-    default:
-      return 200
-    }
-  }
-
   public exposed (
+    apiDefinition: Omit<ApiDefinition, 'path' | 'version' | 'protection'>,
     route: string,
     version: number,
     controller: ControllerFunction,
-    schema: ValidationRules,
-    method: Method,
-    middleware?: MiddlwewareFunction,
+    middlewares: MiddlwewareFunction[],
   ): void {
-    app[method](
-      `/v${version}/${route}`,
-      validateSchema(schema),
-      middleware !== undefined ? middleware : (_req: Request, _res: Response, next: NextFunction): void => { next(); },
-      this.returnResponseFromController(controller, method))
+    const path: string = `/v${version}/${route}`
+    swagger.build({
+      ...apiDefinition,
+      protection: ApiProtection.exposed,
+      path,
+    })
+
+    Router.app[apiDefinition.method](
+      path,
+      validateSchema(apiDefinition.schema),
+      ...middlewares,
+      this.returnResponseFromController(controller, apiDefinition.response_code))
   }
 
   private protectedRouteMiddleware (req: Request, res: Response, next: NextFunction): Response | void {
@@ -64,18 +65,24 @@ export class Router {
   }
 
   public protected (
+    apiDefinition: Omit<ApiDefinition, 'path' | 'version' | 'protection' >,
     route: string,
     version: number,
     controller: ControllerFunction,
-    schema: ValidationRules,
-    method: Method,
-    middleware?: MiddlwewareFunction,
+    middlewares: MiddlwewareFunction[],
   ): void {
-    app[method](
+    const path: string = `/v${version}/${route}`
+    swagger.build({
+      ...apiDefinition,
+      protection: ApiProtection.token_protected,
+      path,
+    })
+
+    Router.app[apiDefinition.method](
       `/v${version}/${route}`,
-      validateSchema(schema), 
+      validateSchema(apiDefinition.schema),
       this.protectedRouteMiddleware,
-      middleware !== undefined ? middleware : (_req: Request, _res: Response, next: NextFunction): void => { next(); },
-      this.returnResponseFromController(controller, method))
+      ...middlewares,
+      this.returnResponseFromController(controller, apiDefinition.response_code))
   }
 }

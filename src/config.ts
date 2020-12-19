@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import { exec } from 'child_process'
+import { initDatabase } from './setup/sequlize'
 
 dotenv.config();
 
@@ -25,16 +25,4 @@ function checkEnvironmentVariables (): boolean {
   return DATABASE_CONNECTION_URL !== undefined
       && SENDGRID_API_KEY !== undefined
       && BASE_URI !== undefined
-}
-
-async function initDatabase (): Promise<void> {
-  await new Promise((resolve, reject) => {
-    const migrate = exec(
-      `npx sequelize-cli db:migrate --url ${DATABASE_CONNECTION_URL}`,
-      err => (err ? reject(err): resolve())
-    );
-
-    migrate.stdout?.pipe(process.stdout);
-    migrate.stderr?.pipe(process.stderr);
-  });
 }

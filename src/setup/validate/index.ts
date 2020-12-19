@@ -1,20 +1,51 @@
-import joi, { SchemaMap } from 'joi'
+import joi, { Schema } from 'joi'
+
 import { NextFunction, Request, Response } from 'express';
 import { throwException } from '../errors';
 
+type SchemaLikeWithoutArray = string | number | boolean | null | Schema;
+type SchemaLike = SchemaLikeWithoutArray;
+
+export type ValidationSchema <T> = joi.ObjectSchema<{
+  [key in keyof T]: SchemaLike | SchemaLike[] | ValidationSchema<T[keyof T]>;
+}>;
+
+export type SchemaObject <T> = {
+  [key in keyof T]: SchemaLike | SchemaLike[] | SchemaObject<T[keyof T]>;
+}
+
+interface OptionalSchemaMap {
+  [key: string]: SchemaLike | SchemaLike[] | undefined;
+}
+export type OptionalSchemaMapJoiObject = joi.ObjectSchema<OptionalSchemaMap> | joi.ArraySchema
+
 export interface ValidationRules {
-    params?: SchemaMap;
-    body?: SchemaMap;
-    query?: SchemaMap;
+  params?: OptionalSchemaMapJoiObject;
+  body?: OptionalSchemaMapJoiObject;
+  query?: OptionalSchemaMapJoiObject;
+}
+
+export function required<T>(schema: SchemaObject<T>): joi.ObjectSchema {
+  return joi.object(schema).required()
+}
+
+export function optional<T>(schema: SchemaObject<T>): joi.ObjectSchema {
+  return joi.object(schema).optional()
 }
 
 export function validateSchema (rules: ValidationRules): (req: Request, res: Response, next: NextFunction) => Promise<void | Response>  {
   return async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
     try {
       await Promise.all(Object.keys(rules).map(async (reqParameter: string) => {
-        const Reqschema: SchemaMap | undefined = rules[reqParameter as keyof ValidationRules];
-        const schema = joi.object(Reqschema);
-        await schema.validate(req[reqParameter as keyof ValidationRules])
+        const parameterSchema: OptionalSchemaMapJoiObject | undefined = rules[reqParameter as keyof ValidationRules];
+
+        if (parameterSchema !== undefined) {
+          const validation: joi.ValidationResult = await parameterSchema.validate(req[reqParameter as keyof ValidationRules])
+
+          if (validation.error !== undefined) {
+            throw new Error(JSON.stringify(validation.error.message))
+          }
+        }
       }));
 
       next();

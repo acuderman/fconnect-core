@@ -1,13 +1,15 @@
 import { Response } from 'express';
 
-interface ErrorList {
+export interface ErrorList {
   [key: string]: ErrorData;
 }
 
-interface ErrorData {
+export interface ErrorData {
   status: number;
   err_code: string;
   message: string;
+  trace_id?: string;
+  request_id?: string;
 }
 
 export const errorList: ErrorList = {
