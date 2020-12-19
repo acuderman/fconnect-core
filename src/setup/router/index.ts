@@ -6,6 +6,7 @@ import { ExtendedProtectedRequest } from '../interfaces'
 import * as swagger from '../swagger/generate'
 import { ApiDefinition, ApiProtection } from '../swagger/generate'
 import bodyParser from 'body-parser'
+import { ServerResponse } from 'http'
 
 type MiddlwewareFunction = (req: Request, res: Response, next: NextFunction) => void
 type ControllerFunction = (req: Request<any>, res: Response, next: NextFunction) => Record<string, any> | Promise<Record<string, any>>
@@ -23,9 +24,15 @@ export class Router {
   ): (req: Request, res: Response, next: NextFunction) => Promise<Response> {
     return async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
       try {
-        const controllerResponse: Record<string, any> | void = await controller(req, res, next);
+        res.status(responseCode)
 
-        return res.status(responseCode).json(controllerResponse)
+        const controllerResponse: Record<string, any> | void | Response = await controller(req, res, next);
+
+        if (controllerResponse instanceof ServerResponse) {
+          return <Response> controllerResponse
+        }
+
+        return res.json(controllerResponse)
       } catch (e) {
         return throwException(e.message, res);
       }

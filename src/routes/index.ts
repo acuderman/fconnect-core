@@ -55,8 +55,6 @@ function addRegistrationRoutes(router: Router): void {
     [],
   )
 
-
-
   router.exposed(
     {
       method: Method.get,
