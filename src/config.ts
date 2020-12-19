@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-// import { initDatabase } from './setup/sequlize'
+import { initDatabase } from './setup/sequlize'
 
 dotenv.config();
 
@@ -18,7 +18,7 @@ export async function initConfig (): Promise<void> {
     process.exit(1);
   }
 
-  // await initDatabase()
+  await initDatabase()
 }
 
 function checkEnvironmentVariables (): boolean {
