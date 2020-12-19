@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node build/src/index.js",
     "start-dev": "nodemon",
-    "build": "ts-node ./src/build.ts && rimraf ./build && tsc",
+    "build:swagger": "ts-node ./src/build.ts",
+    "build": "rimraf ./build && tsc",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "migrate": "npx sequelize-cli db:migrate",
