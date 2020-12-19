@@ -22,7 +22,7 @@ export interface ApiDefinition {
   schema: ValidationRules,
   method: Method,
   description: string,
-  response: OptionalSchemaMapJoiObject,
+  response: OptionalSchemaMapJoiObject | joi.StringSchema,
   response_description: string,
   response_code: number,
   errors: ErrorData[],
@@ -162,6 +162,6 @@ export function writeSwagger (path: string): void {
   fs.writeFileSync(`${path}.yaml`, yaml)
 }
 
-export function addApiHeader(apiHeader: Record<string, any>) {
+export function addApiHeader(apiHeader: Record<string, any>): void {
   api = apiHeader
 }

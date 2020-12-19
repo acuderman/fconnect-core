@@ -17,7 +17,6 @@ export class Router {
     Router.app.use(bodyParser.json())
   }
 
-
   private returnResponseFromController (
     controller: ControllerFunction,
     responseCode: number,
@@ -38,7 +37,7 @@ export class Router {
     route: string,
     version: number,
     controller: ControllerFunction,
-    middleware?: MiddlwewareFunction,
+    middlewares: MiddlwewareFunction[],
   ): void {
     const path: string = `/v${version}/${route}`
     swagger.build({
@@ -50,7 +49,7 @@ export class Router {
     Router.app[apiDefinition.method](
       path,
       validateSchema(apiDefinition.schema),
-      middleware !== undefined ? middleware : (_req: Request, _res: Response, next: NextFunction): void => { next(); },
+      ...middlewares,
       this.returnResponseFromController(controller, apiDefinition.response_code))
   }
 
@@ -70,7 +69,7 @@ export class Router {
     route: string,
     version: number,
     controller: ControllerFunction,
-    middleware?: MiddlwewareFunction,
+    middlewares: MiddlwewareFunction[],
   ): void {
     const path: string = `/v${version}/${route}`
     swagger.build({
@@ -83,7 +82,7 @@ export class Router {
       `/v${version}/${route}`,
       validateSchema(apiDefinition.schema),
       this.protectedRouteMiddleware,
-      middleware !== undefined ? middleware : (_req: Request, _res: Response, next: NextFunction): void => { next(); },
+      ...middlewares,
       this.returnResponseFromController(controller, apiDefinition.response_code))
   }
 }

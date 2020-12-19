@@ -1,10 +1,12 @@
-import joi, { SchemaLike } from 'joi'
+import joi, { Schema } from 'joi'
 
 import { NextFunction, Request, Response } from 'express';
 import { throwException } from '../errors';
 
+type SchemaLikeWithoutArray = string | number | boolean | null | Schema;
+type SchemaLike = SchemaLikeWithoutArray;
+
 export type ValidationSchema <T> = joi.ObjectSchema<{
-  // TODO: update SchemaLike with subset so not everything matchess... object...
   [key in keyof T]: SchemaLike | SchemaLike[] | ValidationSchema<T[keyof T]>;
 }>;
 

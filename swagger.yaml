@@ -122,13 +122,29 @@ paths:
                       - "error_code"
                       - "message"
                       - "status"
-  /v1/exposed_test:
-    post:
-      security:
-        - bearerAuth: []
+  /v1/register/verify/:tracking_id:
+    get:
       tags:
-        - "Protected"
-      description: "Register new account"
+        - "Exposed"
+      description: "Verify tracking id"
+      parameters:
+        - in: "path"
+          name: "tracking_id"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Success message"
+          content:
+            application/json:
+              schema:
+                type: "string"
+  /v1/login:
+    post:
+      tags:
+        - "Exposed"
+      description: "User login"
       parameters: []
       requestBody:
         content:
@@ -138,21 +154,21 @@ paths:
               properties:
                 google_id_token:
                   type: "string"
-                student_email:
-                  type: "string"
-                  format: "email"
               required:
                 - "google_id_token"
-                - "student_email"
               additionalProperties: false
       responses:
-        204:
-          description: "void"
+        200:
+          description: "Returns access token"
           content:
             application/json:
               schema:
                 type: "object"
-                properties: {}
+                properties:
+                  access_token:
+                    type: "string"
+                required:
+                  - "access_token"
                 additionalProperties: false
         400:
           description: "Error"
@@ -169,10 +185,10 @@ paths:
                         example: 400
                       error_code:
                         type: "string"
-                        example: "ERR_NOT_FAMNIT_EMAIL"
+                        example: "ERR_USER_DOES_NOT_EXIST"
                       message:
                         type: "string"
-                        example: "Email provided does not end with @student.upr.si ."
+                        example: "User not found."
                       request_id:
                         type: "string"
                         example: "d51b265e-5123-428d-8636-cb2df3d52067"
@@ -196,29 +212,6 @@ paths:
                       message:
                         type: "string"
                         example: "Either Google or student email was already used for login."
-                      request_id:
-                        type: "string"
-                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
-                      trace_id:
-                        type: "string"
-                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
-                    required:
-                      - "error_code"
-                      - "message"
-                      - "status"
-                  - type: "object"
-                    additionalProperties: false
-                    properties:
-                      status:
-                        type: "integer"
-                        format: "int32"
-                        example: 400
-                      error_code:
-                        type: "string"
-                        example: "ERR_UNABLE_TO_DECODE_GOOGLE_ID_TOKEN"
-                      message:
-                        type: "string"
-                        example: "Unable to decode google id token."
                       request_id:
                         type: "string"
                         example: "d51b265e-5123-428d-8636-cb2df3d52067"
