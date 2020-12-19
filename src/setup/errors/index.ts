@@ -8,6 +8,8 @@ export interface ErrorData {
   status: number;
   err_code: string;
   message: string;
+  trace_id?: string;
+  request_id?: string;
 }
 
 export const errorList: ErrorList = {

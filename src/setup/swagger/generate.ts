@@ -1,35 +1,51 @@
 // @ts-ignore
 import convert from 'joi-to-json';
+// @ts-ignore
+import YAML from 'json-to-pretty-yaml'
 
 import { OptionalSchemaMapJoiObject, ValidationRules } from '../validate'
 import { Method } from '../router/interfaces'
-import joi from 'joi'
-import { inspect } from 'util'
 import { ErrorData } from '../errors'
 
-interface ApiDefinition {
+
+import joi from 'joi'
+import * as fs from 'fs'
+
+export enum ApiProtection {
+  exposed = 'exposed',
+  token_protected = 'token_protected'
+}
+
+export interface ApiDefinition {
+  protection: ApiProtection,
   path: string,
   schema: ValidationRules,
   method: Method,
+  description: string,
   response: OptionalSchemaMapJoiObject,
-  responseCode: number,
+  response_description: string,
+  response_code: number,
   errors: ErrorData[],
+}
+
+let api: Record<string, any> = {
+  paths: {}
 }
 
 function constructParameters (paramType: 'path' | 'query', params: OptionalSchemaMapJoiObject | undefined): Record<string, string>[] {
   if (params === undefined) {
     return []
   }
-  const swagger = convert(params)
+  const swagger = convert(params, false)
   const swaggerProperties = swagger.properties
 
   return Object.keys(swaggerProperties).map((param: string) => {
 
     return {
-      'in': paramType,
-      'name': param,
-      'required': swagger.required.includes(param),
-      'schema': swaggerProperties[param]
+      in: paramType,
+      name: param,
+      required: swagger.required.includes(param),
+      schema: swaggerProperties[param]
     }
   })
 }
@@ -37,21 +53,22 @@ function constructParameters (paramType: 'path' | 'query', params: OptionalSchem
 function constructErrorSchemas (errors: ErrorData[]) {
   const errorSchemas: Record<string, any> = {}
 
-  errors.map((error: ErrorData) => {
+  errors.forEach((error: ErrorData) => {
     const errorSchema = constructErrorResponse(error)
-    errorSchemas[error.status] = errorSchemas[error.status] === undefined
-      ? {
+    if (errorSchemas[error.status] === undefined) {
+      errorSchemas[error.status] = {
         description: 'Error',
         content: {
           'application/json': {
             schema: {
-              oneOf: [errorSchema, errorSchema]
+              oneOf: [errorSchema]
             },
           }
         }
       }
-      // TODO: push doesn't work properly
-      : errorSchemas[error.status].content['application/json'].schema.oneOf.push(errorSchema)
+    } else {
+      errorSchemas[error.status].content['application/json'].schema.oneOf.push(errorSchema)
+    }
   })
 
   return errorSchemas
@@ -61,81 +78,90 @@ function constructErrorResponse (error: ErrorData) {
   return {
     type: 'object',
     additionalProperties: false,
-    'properties': {
-      'status': {
-        'type': 'integer',
-        'format': 'int32',
-        'example': error.status
+    properties: {
+      status: {
+        type: 'integer',
+        format: 'int32',
+        example: error.status
       },
-      'error_code': {
-        'type': 'string',
-        'example': error.err_code
+      error_code: {
+        type: 'string',
+        example: error.err_code
       },
-      'message': {
-        'type': 'string',
-        'example': error.message
+      message: {
+        type: 'string',
+        example: error.message
       },
-      'required': [
-        'error_code',
-        'message',
-        'status'
-      ]
-    }
+      request_id: {
+        type: 'string',
+        example: 'd51b265e-5123-428d-8636-cb2df3d52067'
+      },
+      trace_id: {
+        type: 'string',
+        example: 'd51b265e-5123-428d-8636-cb2df3d52067'
+      },
+    },
+    required: [
+      'error_code',
+      'message',
+      'status'
+    ]
   }
 }
 
 function documentApi (apiDefinition: ApiDefinition) {
-  return {
-    'info': {
-      'title': 'Service name',
-      'version': '1.0.0',
-      'description': 'API for service name',
-      'contact': {
-        'name': 'Me',
-        'email': 'test@g.com',
-        'url': ''
-      }
-    },
-    'openapi': '3.0.0',
-    paths: {
-      [apiDefinition.path]: {
-        [apiDefinition.method]: {
-          parameters: [
-            ...constructParameters('path', joi.object({
-              asd: joi.string().required()
-            })),
-            ...constructParameters('query', apiDefinition.schema.query)
-          ],
-          requestBody: {
-            content: {
-              'application/json': {
-                schema: convert(apiDefinition.schema.body ?? joi.object({}), false)
-              }
-            }
-          },
-          responses: {
-            [apiDefinition.responseCode]: {
-              description: 'ok',
-              'content': {
-                'application/json': {
-                  schema: convert(apiDefinition.response ?? joi.object({}), false)
-                }
-              }
-            },
-            ...constructErrorSchemas(apiDefinition.errors),
-          }
+  const protection = apiDefinition.protection === ApiProtection.token_protected ? {
+    security: [{ 'bearerAuth': [] }],
+    tags: ['Protected'],
+  } : {
+    tags: ['Exposed'],
+  }
+
+  const requestBody = apiDefinition.schema.body !== undefined ? {
+    requestBody: {
+      content: {
+        'application/json': {
+          schema: convert(apiDefinition.schema.body ?? joi.object({}), false)
         }
-      },
-    },
+      }
+    }
+  } : {}
+
+  api.paths[apiDefinition.path] = {
+    [apiDefinition.method]: {
+      ...protection,
+      description: apiDefinition.description,
+      parameters: [
+        ...constructParameters('path', apiDefinition.schema.params),
+        ...constructParameters('query', apiDefinition.schema.query)
+      ],
+      ...requestBody,
+      responses: {
+        [apiDefinition.response_code]: {
+          description: apiDefinition.response_description,
+          content: {
+            'application/json': {
+              schema: convert(apiDefinition.response ?? joi.object({}), false)
+            }
+          }
+        },
+        ...constructErrorSchemas(apiDefinition.errors),
+      }
+    }
   }
 }
 
 export function build (apiDefinition: ApiDefinition): void {
-  const swagger = documentApi(apiDefinition)
+  documentApi(apiDefinition)
+}
 
-  console.log('dslfdmsfkdsm')
-  console.log(inspect(swagger, {
-    showHidden: false,
-    depth: null
-  }))
+export function writeSwagger (path: string): void {
+  fs.writeFileSync(`${path}.json`, JSON.stringify(api))
+
+  const yaml = YAML.stringify(api)
+  fs.writeFileSync(`${path}.yaml`, yaml)
+}
+
+export function addApiHeader(apiHeader: Record<string, any>) {
+  api = apiHeader
 }

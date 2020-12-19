@@ -11,7 +11,7 @@ export type ValidationSchema <T> = joi.ObjectSchema<{
 interface OptionalSchemaMap {
   [key: string]: SchemaLike | SchemaLike[] | undefined;
 }
-export type OptionalSchemaMapJoiObject = joi.ObjectSchema<OptionalSchemaMap>
+export type OptionalSchemaMapJoiObject = joi.ObjectSchema<OptionalSchemaMap> | joi.ArraySchema
 
 export interface ValidationRules {
   params?: OptionalSchemaMapJoiObject;

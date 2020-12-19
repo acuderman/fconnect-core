@@ -1,0 +1,231 @@
+openapi: "3.0.0"
+info:
+  title: "Fconnect core service"
+  version: "1.0.0"
+  description: "API for Fconnect core service"
+  contact:
+    name: "Fconnect Team"
+    email: "info@fconnect.com"
+    url: "http:localhost:3000"
+tags:
+  - name: "Protected"
+  - name: "Exposed"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"
+paths:
+  /v1/register:
+    post:
+      tags:
+        - "Exposed"
+      description: "Register new account"
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                google_id_token:
+                  type: "string"
+                student_email:
+                  type: "string"
+                  format: "email"
+              required:
+                - "google_id_token"
+                - "student_email"
+              additionalProperties: false
+      responses:
+        204:
+          description: "void"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties: {}
+                additionalProperties: false
+        400:
+          description: "Error"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: "object"
+                    additionalProperties: false
+                    properties:
+                      status:
+                        type: "integer"
+                        format: "int32"
+                        example: 400
+                      error_code:
+                        type: "string"
+                        example: "ERR_NOT_FAMNIT_EMAIL"
+                      message:
+                        type: "string"
+                        example: "Email provided does not end with @student.upr.si ."
+                      request_id:
+                        type: "string"
+                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
+                      trace_id:
+                        type: "string"
+                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
+                    required:
+                      - "error_code"
+                      - "message"
+                      - "status"
+                  - type: "object"
+                    additionalProperties: false
+                    properties:
+                      status:
+                        type: "integer"
+                        format: "int32"
+                        example: 400
+                      error_code:
+                        type: "string"
+                        example: "ERR_USER_WITH_THAT_EMAIL_ALREADY_EXISTS"
+                      message:
+                        type: "string"
+                        example: "Either Google or student email was already used for login."
+                      request_id:
+                        type: "string"
+                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
+                      trace_id:
+                        type: "string"
+                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
+                    required:
+                      - "error_code"
+                      - "message"
+                      - "status"
+                  - type: "object"
+                    additionalProperties: false
+                    properties:
+                      status:
+                        type: "integer"
+                        format: "int32"
+                        example: 400
+                      error_code:
+                        type: "string"
+                        example: "ERR_UNABLE_TO_DECODE_GOOGLE_ID_TOKEN"
+                      message:
+                        type: "string"
+                        example: "Unable to decode google id token."
+                      request_id:
+                        type: "string"
+                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
+                      trace_id:
+                        type: "string"
+                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
+                    required:
+                      - "error_code"
+                      - "message"
+                      - "status"
+  /v1/exposed_test:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - "Protected"
+      description: "Register new account"
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                google_id_token:
+                  type: "string"
+                student_email:
+                  type: "string"
+                  format: "email"
+              required:
+                - "google_id_token"
+                - "student_email"
+              additionalProperties: false
+      responses:
+        204:
+          description: "void"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties: {}
+                additionalProperties: false
+        400:
+          description: "Error"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: "object"
+                    additionalProperties: false
+                    properties:
+                      status:
+                        type: "integer"
+                        format: "int32"
+                        example: 400
+                      error_code:
+                        type: "string"
+                        example: "ERR_NOT_FAMNIT_EMAIL"
+                      message:
+                        type: "string"
+                        example: "Email provided does not end with @student.upr.si ."
+                      request_id:
+                        type: "string"
+                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
+                      trace_id:
+                        type: "string"
+                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
+                    required:
+                      - "error_code"
+                      - "message"
+                      - "status"
+                  - type: "object"
+                    additionalProperties: false
+                    properties:
+                      status:
+                        type: "integer"
+                        format: "int32"
+                        example: 400
+                      error_code:
+                        type: "string"
+                        example: "ERR_USER_WITH_THAT_EMAIL_ALREADY_EXISTS"
+                      message:
+                        type: "string"
+                        example: "Either Google or student email was already used for login."
+                      request_id:
+                        type: "string"
+                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
+                      trace_id:
+                        type: "string"
+                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
+                    required:
+                      - "error_code"
+                      - "message"
+                      - "status"
+                  - type: "object"
+                    additionalProperties: false
+                    properties:
+                      status:
+                        type: "integer"
+                        format: "int32"
+                        example: 400
+                      error_code:
+                        type: "string"
+                        example: "ERR_UNABLE_TO_DECODE_GOOGLE_ID_TOKEN"
+                      message:
+                        type: "string"
+                        example: "Unable to decode google id token."
+                      request_id:
+                        type: "string"
+                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
+                      trace_id:
+                        type: "string"
+                        example: "d51b265e-5123-428d-8636-cb2df3d52067"
+                    required:
+                      - "error_code"
+                      - "message"
+                      - "status"
